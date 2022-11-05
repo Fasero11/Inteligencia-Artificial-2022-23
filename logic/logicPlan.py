@@ -53,7 +53,15 @@ def sentence1() -> Expr:
     (not A) or (not B) or C
     """
     "*** BEGIN YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    A = logic.Expr('A')
+    B = logic.Expr('B')
+    C = logic.Expr('C')
+    sentence_1 = logic.disjoin(A, B)        # A or B
+    sentence_2 = ~A % (~B | C)              # (not A) if and only if ((not B) or C)
+    sentence_3 = logic.disjoin(~A, ~B, C)   # (not A) or (not B) or C
+    
+    # Returns true when all are true.
+    return logic.conjoin(sentence_1, sentence_2, sentence_3) 
     "*** END YOUR CODE HERE ***"
 
 
@@ -66,7 +74,18 @@ def sentence2() -> Expr:
     (not D) implies C
     """
     "*** BEGIN YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    A = logic.Expr('A')
+    B = logic.Expr('B')
+    C = logic.Expr('C')
+    D = logic.Expr('D')
+
+    sentence_1 = C % (B | D)        # C if and only if (B or D)
+    sentence_2 = A >> (~B & ~D)     # A implies ((not B) and (not D))
+    sentence_3 = ~(B & ~C) >> A     # (not (B and (not C))) implies A
+    sentence_4 = ~D >> C            # (not D) implies C
+
+    # Returns true when all are true.
+    return logic.conjoin(sentence_1, sentence_2, sentence_3, sentence_4)
     "*** END YOUR CODE HERE ***"
 
 
@@ -84,7 +103,17 @@ def sentence3() -> Expr:
     (Project update: for this question only, [0] and _t are both acceptable.)
     """
     "*** BEGIN YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    A = logic.PropSymbolExpr("PacmanAlive",1)
+    B = logic.PropSymbolExpr("PacmanAlive",0)
+    C = logic.PropSymbolExpr("PacmanBorn",0)
+    D = logic.PropSymbolExpr("PacmanKilled",0)
+
+    pacman_is_alive_1 = A % ((B & ~D) | (~B & C))
+    cant_born_and_alive_0 = ~(B & C)
+    born_0 = C
+
+    # Returns true when all are true.
+    return logic.conjoin(pacman_is_alive_1, cant_born_and_alive_0, born_0) 
     "*** END YOUR CODE HERE ***"
 
 def findModel(sentence: Expr) -> Dict[Expr, bool]:
@@ -109,14 +138,23 @@ def findModelCheck() -> Dict[Any, bool]:
         def __repr__(self):
             return self.variable_name
     "*** BEGIN YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    return("'{'a: True'}'")
     "*** END YOUR CODE HERE ***"
 
 def entails(premise: Expr, conclusion: Expr) -> bool:
     """Returns True if the premise entails the conclusion and False otherwise.
     """
     "*** BEGIN YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    result = False
+    sentence_1 = (premise & ~conclusion)
+    model = findModel(sentence_1)
+
+    # If findModel() returns false, then there is no satisfying model.
+    # If (premise & ~conclusion) is unsatisfiable, then the premise implies the conclusion.
+    if not model:
+        result = True
+
+    return(result)
     "*** END YOUR CODE HERE ***"
 
 def plTrueInverse(assignments: Dict[Expr, bool], inverse_statement: Expr) -> bool:
@@ -124,6 +162,8 @@ def plTrueInverse(assignments: Dict[Expr, bool], inverse_statement: Expr) -> boo
     pl_true may be useful here; see logic.py for its description.
     """
     "*** BEGIN YOUR CODE HERE ***"
+    # print("assignments: ", assignments)
+    # print("inverse_statement: ", inverse_statement)
     util.raiseNotDefined()
     "*** END YOUR CODE HERE ***"
 
@@ -149,8 +189,8 @@ def atLeastOne(literals: List[Expr]) -> Expr:
     >>> print(pl_true(atleast1,model2))
     True
     """
-    "*** BEGIN YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    "*** BEGIN YOUR CODE HERE ***"    
+    return logic.disjoin(literals)
     "*** END YOUR CODE HERE ***"
 
 
@@ -162,7 +202,33 @@ def atMostOne(literals: List[Expr]) -> Expr:
     itertools.combinations may be useful here.
     """
     "*** BEGIN YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    not_literals = []
+    for literal in literals:
+        not_literals.append(~literal)
+    #print("not_literals:", not_literals)
+
+    combinations = list(itertools.combinations(not_literals,2))
+    #print("combinations:", combinations)
+
+    new_combinations = []
+    for combination in combinations:
+        A = combination[0]
+        B = combination[1]
+        A_or_B = A | B
+        new_combinations.append(A_or_B) 
+
+        #print("new_combination:", A_or_B)
+
+    #print("new_combinations: ", new_combinations)
+    #print("result: ", logic.conjoin(new_combinations))
+
+    # result: (~A | ~B) & (~A | ~C) & (~A | ~D) & (~B | ~C) & (~B | ~D) & (~C | ~D)
+    # If any or the "or" returns False, then at least two of the literals were True.
+    # And so the result will be False. Because in order to return True as the result
+    # all the "or" must be true.
+    # Example: A and B are True. C and D are false.
+    # result: F & T & T & T & T & T & T = False. (~A | ~B) returned False.
+    return logic.conjoin(new_combinations)
     "*** END YOUR CODE HERE ***"
 
 
@@ -173,7 +239,33 @@ def exactlyOne(literals: List[Expr]) -> Expr:
     the expressions in the list is true.
     """
     "*** BEGIN YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    not_literals = []
+    for literal in literals:
+        not_literals.append(~literal)
+
+    combinations = list(itertools.combinations(not_literals,2))
+
+
+    new_combinations = []
+    for combination in combinations:
+        A = combination[0]
+        B = combination[1]
+        A_or_B = A | B
+        new_combinations.append(A_or_B) 
+
+    or_all_literals = logic.disjoin(literals)
+    new_combinations.append(or_all_literals)
+    #print(logic.conjoin(new_combinations))
+    
+    # result: (~A | ~B) & (~A | ~C) & (~A | ~D) & (~B | ~C) & (~B | ~D) & (~C | ~D) & (A | B | C | D) 
+    # Same as atMostOne but adding (A | B | C | D) to the conjuction.
+    # By adding this we can verify if we are in the case were one literal is True
+    # or if none is True. (atMostOne already verifies that no more than 1 is True)
+    # Case 1: All are False:
+    # result: T & T & T & T & T & T & T & F = False. (A | B | C | D) returned False.
+    # Case 2: ONE is True:
+    # result: T & T & T & T & T & T & T & T = True. (A | B | C | D) returned True.
+    return logic.conjoin(new_combinations)
     "*** END YOUR CODE HERE ***"
 
 #______________________________________________________________________________
