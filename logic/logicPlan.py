@@ -138,7 +138,7 @@ def findModelCheck() -> Dict[Any, bool]:
         def __repr__(self):
             return self.variable_name
     "*** BEGIN YOUR CODE HERE ***"
-    return("'{'a: True'}'")
+    return {dummyClass('a'): True}
     "*** END YOUR CODE HERE ***"
 
 def entails(premise: Expr, conclusion: Expr) -> bool:
@@ -162,9 +162,7 @@ def plTrueInverse(assignments: Dict[Expr, bool], inverse_statement: Expr) -> boo
     pl_true may be useful here; see logic.py for its description.
     """
     "*** BEGIN YOUR CODE HERE ***"
-    # print("assignments: ", assignments)
-    # print("inverse_statement: ", inverse_statement)
-    util.raiseNotDefined()
+    return pl_true(~inverse_statement, assignments)
     "*** END YOUR CODE HERE ***"
 
 #______________________________________________________________________________
@@ -212,10 +210,10 @@ def atMostOne(literals: List[Expr]) -> Expr:
 
     new_combinations = []
     for combination in combinations:
-        A = combination[0]
-        B = combination[1]
-        A_or_B = A | B
-        new_combinations.append(A_or_B) 
+        P = combination[0]
+        Q = combination[1]
+        P_or_Q = P | Q
+        new_combinations.append(P_or_Q)  
 
         #print("new_combination:", A_or_B)
 
@@ -239,33 +237,19 @@ def exactlyOne(literals: List[Expr]) -> Expr:
     the expressions in the list is true.
     """
     "*** BEGIN YOUR CODE HERE ***"
-    not_literals = []
-    for literal in literals:
-        not_literals.append(~literal)
 
-    combinations = list(itertools.combinations(not_literals,2))
+    result = atMostOne(literals) & atLeastOne(literals)
+    #print(result)
 
-
-    new_combinations = []
-    for combination in combinations:
-        A = combination[0]
-        B = combination[1]
-        A_or_B = A | B
-        new_combinations.append(A_or_B) 
-
-    or_all_literals = logic.disjoin(literals)
-    new_combinations.append(or_all_literals)
-    #print(logic.conjoin(new_combinations))
-    
     # result: (~A | ~B) & (~A | ~C) & (~A | ~D) & (~B | ~C) & (~B | ~D) & (~C | ~D) & (A | B | C | D) 
-    # Same as atMostOne but adding (A | B | C | D) to the conjuction.
+    # Same as atMostOne but adding (A | B | C | D) to the conjunction.
     # By adding this we can verify if we are in the case were one literal is True
     # or if none is True. (atMostOne already verifies that no more than 1 is True)
     # Case 1: All are False:
     # result: T & T & T & T & T & T & T & F = False. (A | B | C | D) returned False.
     # Case 2: ONE is True:
     # result: T & T & T & T & T & T & T & T = True. (A | B | C | D) returned True.
-    return logic.conjoin(new_combinations)
+    return logic.conjoin(result)
     "*** END YOUR CODE HERE ***"
 
 #______________________________________________________________________________
@@ -298,7 +282,8 @@ def pacmanSuccessorAxiomSingle(x: int, y: int, time: int, walls_grid: List[List[
         return None
     
     "*** BEGIN YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    PacMan_in_1 = logic.PropSymbolExpr(pacman_str, x, y, time=now)
+    return PacMan_in_1 % logic.disjoin(possible_causes)
     "*** END YOUR CODE HERE ***"
 
 
