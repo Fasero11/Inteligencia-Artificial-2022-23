@@ -470,7 +470,7 @@ def positionLogicPlan(problem) -> List:
     result = []
 
     #PacMan position at time 0. (Initial position)
-    KB.append(PropSymbolExpr(pacman_str, x0, y0, 0))
+    KB.append(PropSymbolExpr(pacman_str, x0, y0, time=0))
 
     for t in range(50):
         print("Time Step:",t)
@@ -481,8 +481,10 @@ def positionLogicPlan(problem) -> List:
         KB.append(exactlyOne(pacman_in_square))
 
         # ¿Existe alguna asignación que satisface las variables dadas en la base del conocimiento hasta ahora? 
-        if findModel(conjoin(KB + [PropSymbolExpr(pacman_str, xg, yg, time=t)])):
+        model = findModel(conjoin(KB + [PropSymbolExpr(pacman_str, xg, yg, time=t)]))
+        if model:
             # If we reached the goal. Exit the loop and return the sequence of actions.
+            result = extractActionSequence(model, actions)
             break
 
         #Pacman takes exactly one action at timestep t."
@@ -493,7 +495,7 @@ def positionLogicPlan(problem) -> List:
         
         # Sentencias de Transition Model.
         for x,y in non_wall_coords:
-            KB.append(pacmanSuccessorAxiomSingle(x, y, t, walls_grid))
+            KB.append(pacmanSuccessorAxiomSingle(x, y, t+1, walls_grid))
 
     return result
     "*** END YOUR CODE HERE ***"
