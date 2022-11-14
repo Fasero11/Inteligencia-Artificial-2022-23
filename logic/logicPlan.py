@@ -526,8 +526,78 @@ def foodLogicPlan(problem) -> List:
     KB = []
 
     "*** BEGIN YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    # Array of strings. Each one = one action.
+    result = []
+
+    #PacMan position at time 0. (Initial position)
+    KB.append(PropSymbolExpr(pacman_str, x0, y0, time=0))
+
+    food_state = []
+    for food_coords in food:
+        x = food_coords[0]
+        y = food_coords[1] 
+        food_state += [PropSymbolExpr(pacman_str, x, y, time=0)]
+
+    for t in range(50):
+        print("Time Step:",t)
+
+        #Pacman solo puede estar en exactlyOne de las localizaciones en non_wall_coords en el instante de tiempo t
+        pacman_in_square = []
+        for x,y in non_wall_coords:
+            pacman_in_square.append(PropSymbolExpr(pacman_str, x, y, time=t))
+        KB.append(exactlyOne(pacman_in_square))
+
+        #Pacman takes exactly one action at timestep t."
+        pacman_action = []
+        for action in actions:
+            pacman_action.append(PropSymbolExpr(action, time=t))
+        KB.append(exactlyOne(pacman_action))
+
+        # Sentencias de Transition Model.
+        for x,y in non_wall_coords:
+            KB.append(pacmanSuccessorAxiomSingle(x, y, t+1, walls))
+
+        model = findModel(conjoin(KB + [conjoin(food_state)]))
+        if (model):
+            result = extractActionSequence(model, actions)
+            break
+        
+        food_id = 0
+        for x, y in food:
+            food_state[food_id] = disjoin(food_state[food_id], PropSymbolExpr(pacman_str, x, y, time = t))
+            food_id += 1
+
+    return result
     "*** END YOUR CODE HERE ***"
+
+
+
+    for t in range(50):
+        
+        #Pacman solo puede estar en exactlyOne de las localizaciones en non_wall_coords en el instante de tiempo t
+        pacman_in_square = []
+        for x,y in non_wall_coords:
+            pacman_in_square.append(PropSymbolExpr(pacman_str, x, y, time=t))
+        KB.append(exactlyOne(pacman_in_square))
+
+        # ¿Existe alguna asignación que satisface las variables dadas en la base del conocimiento hasta ahora? 
+        model = findModel(conjoin(KB + [PropSymbolExpr(pacman_str, xg, yg, time=t)]))
+        if model:
+            # If we reached the goal. Exit the loop and return the sequence of actions.
+            result = extractActionSequence(model, actions)
+            break
+
+        #Pacman takes exactly one action at timestep t."
+        pacman_action = []
+        for action in actions:
+            pacman_action.append(PropSymbolExpr(action, time=t))
+        KB.append(exactlyOne(pacman_action))
+        
+        # Sentencias de Transition Model.
+        for x,y in non_wall_coords:
+            KB.append(pacmanSuccessorAxiomSingle(x, y, t+1, walls_grid))
+
+    return result
 
 #______________________________________________________________________________
 # QUESTION 6
