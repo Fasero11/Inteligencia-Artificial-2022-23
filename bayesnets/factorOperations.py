@@ -152,7 +152,45 @@ def eliminateWithCallTracking(callTrackingList=None):
                     "unconditionedVariables: " + str(factor.unconditionedVariables()))
 
         "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        
+        unconditionedVariables = factor.unconditionedVariables()
+        conditionedVariables = factor.conditionedVariables()
+        variableDomainsDict = factor.variableDomainsDict()
+
+        # Remove variable
+        unconditionedVariables.remove(eliminationVariable)
+        new_unconditionedVariables = unconditionedVariables
+
+        # Create new factor
+        new_factor = Factor(new_unconditionedVariables, 
+        conditionedVariables, factor.variableDomainsDict())
+
+        new_AllPossibleAssignmentDicts = new_factor.getAllPossibleAssignmentDicts()
+
+        """
+        print("factor: " + str(factor))
+        print("eliminationVariable: " + str(eliminationVariable))
+        print("unconditionedVariables: " + str(unconditionedVariables))
+        print("conditionedVariables: " + str(conditionedVariables))
+        print("variableDomainsDict: " + str(variableDomainsDict))
+        print("getAllPossibleAssignmentDicts: " + str(AllPossibleAssignmentDicts))
+        print("new_unconditionedVariables: " + str(new_unconditionedVariables))
+        print("new_AllPossibleAssignmentDicts: " + str(new_AllPossibleAssignmentDicts))
+        """
+
+        for assignment in new_AllPossibleAssignmentDicts: # [{'D': 'wet'}, {'D': 'dry'}]
+            prob = 0
+            for eliminationVariable_value in variableDomainsDict[eliminationVariable]: # [{'W': 'sun'}, {'W': 'rain'}]
+                assignment[eliminationVariable] = eliminationVariable_value
+                prob = prob + factor.getProbability(assignment)
+                #print("assignment: " + str(assignment))
+                #print("partial probability: " + str(factor.getProbability(assignment)))
+                #print("total probability: " + str(prob))
+            new_factor.setProbability(assignment, prob)
+
+        print("new_factor: " + str(new_factor))
+
+        return new_factor
         "*** END YOUR CODE HERE ***"
 
     return eliminate
