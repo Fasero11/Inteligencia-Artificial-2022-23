@@ -246,6 +246,41 @@ def normalize(factor):
                             str(factor))
 
     "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    total_probability = 0
+    unconditionedVariables = factor.unconditionedVariables()
+    conditionedVariables = factor.conditionedVariables()
+    variableDomainsDict = factor.variableDomainsDict()
+    AllPossibleAssignmentDicts = factor.getAllPossibleAssignmentDicts()
+    new_unconditionedVariables = set()
+    new_conditionedVariables = conditionedVariables
+
+    for assignment in AllPossibleAssignmentDicts:
+        total_probability += factor.getProbability(assignment)
+
+    if total_probability == 0:
+        return None
+
+    """ new_factor condioned variables = input factor conditioned variables + 
+        input factor one entry unconditioned variables
+    """
+    # Get one entry unconditioned variables 
+    one_entry_variables = []
+    for variable in unconditionedVariables:
+        if len(variableDomainsDict[variable]) == 1:
+            one_entry_variables.append(variable)   # Save them to exclude them from the new unconditioned variables set
+            new_conditionedVariables.add(variable) # Add no the new conditioned variables set
+
+    # All the remaining variables are unconditioned
+    for variable in unconditionedVariables:
+        if variable not in one_entry_variables:
+            new_unconditionedVariables.add(variable)
+
+    new_factor = Factor(new_unconditionedVariables, new_conditionedVariables, variableDomainsDict)
+
+    for assignment in AllPossibleAssignmentDicts:
+        new_probability = factor.getProbability(assignment) / total_probability
+        new_factor.setProbability(assignment, new_probability)
+
+    return new_factor
     "*** END YOUR CODE HERE ***"
 
