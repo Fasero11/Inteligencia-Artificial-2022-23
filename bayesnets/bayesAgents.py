@@ -408,7 +408,46 @@ class VPIAgent(BayesAgent):
         rightExpectedValue = 0
 
         "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        goal_top_right = {}
+        goal_top_left = {}
+
+        #print ("evidence:" + str(evidence))
+        #print ("eliminationOrder:" + str(eliminationOrder))
+      
+        houses = [FOOD_HOUSE_VAR, GHOST_HOUSE_VAR]
+
+        factor_cpt = inference.inferenceByVariableElimination(self.bayesNet, 
+        houses, evidence, eliminationOrder)
+
+        #print("factor" + str(factor))
+
+        # The goal is the food house
+
+                                  # First we create a new empty dictionary
+        goal_top_right.update(evidence)                         # Then we add all the evidence
+        goal_top_right.update({FOOD_HOUSE_VAR: TOP_RIGHT_VAL})  # Finally we state that the food house is on the top right
+        goal_top_right.update({GHOST_HOUSE_VAR: TOP_LEFT_VAL})  # so the ghost house must be top left.
+
+                                   # First we create a new empty dictionary
+        goal_top_left.update(evidence)                          # Then we add all the evidence
+        goal_top_left.update({FOOD_HOUSE_VAR: TOP_LEFT_VAL})    # Finally we state that the food house is on the top right
+        goal_top_left.update({GHOST_HOUSE_VAR: TOP_RIGHT_VAL})  # so the ghost house must be top right.
+
+        goal_top_left_prob = factor_cpt.getProbability(goal_top_left)
+        goal_top_right_prob = factor_cpt.getProbability(goal_top_right)
+
+        print("goal_top_left_prob: " + str(goal_top_left_prob))
+        print("goal_top_right_prob: " + str(goal_top_right_prob))
+
+        rightExpectedValue = goal_top_right_prob * WON_GAME_REWARD \
+        + goal_top_left_prob * GHOST_COLLISION_REWARD
+
+        leftExpectedValue = goal_top_left_prob * WON_GAME_REWARD \
+        + goal_top_right_prob * GHOST_COLLISION_REWARD 
+
+        print("leftExpectedValue: " + str(leftExpectedValue))
+        print("rightExpectedValue: " + str(rightExpectedValue))
+
         "*** END YOUR CODE HERE ***"
 
         return leftExpectedValue, rightExpectedValue
@@ -475,7 +514,16 @@ class VPIAgent(BayesAgent):
         expectedValue = 0
 
         "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        ExplorationProbsAndOutcomes = self.getExplorationProbsAndOutcomes(evidence)
+
+        print("ExplorationProbsAndOutcomes" + str(ExplorationProbsAndOutcomes))
+
+        for ExplorationProbAndOutcome in ExplorationProbsAndOutcomes:
+            prob = ExplorationProbAndOutcome[0]
+            explorationEvidence = ExplorationProbAndOutcome[1]
+            
+            max_value = max(self.computeEnterValues(explorationEvidence, enterEliminationOrder))
+            expectedValue = expectedValue + prob * max_value
         "*** END YOUR CODE HERE ***"
 
         return expectedValue
