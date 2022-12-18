@@ -408,6 +408,7 @@ class VPIAgent(BayesAgent):
         rightExpectedValue = 0
 
         "*** YOUR CODE HERE ***"
+        # The goal is the food house
         goal_top_right = {}
         goal_top_left = {}
 
@@ -421,16 +422,12 @@ class VPIAgent(BayesAgent):
 
         #print("factor" + str(factor))
 
-        # The goal is the food house
-
-                                  # First we create a new empty dictionary
-        goal_top_right.update(evidence)                         # Then we add all the evidence
-        goal_top_right.update({FOOD_HOUSE_VAR: TOP_RIGHT_VAL})  # Finally we state that the food house is on the top right
+        goal_top_right.update(evidence)                         # First we add all the evidence
+        goal_top_right.update({FOOD_HOUSE_VAR: TOP_RIGHT_VAL})  # Then we state that the food house is on the top right
         goal_top_right.update({GHOST_HOUSE_VAR: TOP_LEFT_VAL})  # so the ghost house must be top left.
 
-                                   # First we create a new empty dictionary
-        goal_top_left.update(evidence)                          # Then we add all the evidence
-        goal_top_left.update({FOOD_HOUSE_VAR: TOP_LEFT_VAL})    # Finally we state that the food house is on the top right
+        goal_top_left.update(evidence)                          # First we add all the evidence
+        goal_top_left.update({FOOD_HOUSE_VAR: TOP_LEFT_VAL})    # Then we state that the food house is on the top right
         goal_top_left.update({GHOST_HOUSE_VAR: TOP_RIGHT_VAL})  # so the ghost house must be top right.
 
         goal_top_left_prob = factor_cpt.getProbability(goal_top_left)
@@ -439,9 +436,13 @@ class VPIAgent(BayesAgent):
         print("goal_top_left_prob: " + str(goal_top_left_prob))
         print("goal_top_right_prob: " + str(goal_top_right_prob))
 
+        # Expected value if we assume the food house is top right given all the evidence
+        # (Ghost house can only be top left)
         rightExpectedValue = goal_top_right_prob * WON_GAME_REWARD \
         + goal_top_left_prob * GHOST_COLLISION_REWARD
 
+        # Expected value if we assume the food house is top left given all the evidence
+        # (Ghost house can only be top right)
         leftExpectedValue = goal_top_left_prob * WON_GAME_REWARD \
         + goal_top_right_prob * GHOST_COLLISION_REWARD 
 
@@ -521,7 +522,7 @@ class VPIAgent(BayesAgent):
         for ExplorationProbAndOutcome in ExplorationProbsAndOutcomes:
             prob = ExplorationProbAndOutcome[0]
             explorationEvidence = ExplorationProbAndOutcome[1]
-            
+
             max_value = max(self.computeEnterValues(explorationEvidence, enterEliminationOrder))
             expectedValue = expectedValue + prob * max_value
         "*** END YOUR CODE HERE ***"
