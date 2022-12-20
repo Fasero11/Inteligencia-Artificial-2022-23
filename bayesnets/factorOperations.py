@@ -281,25 +281,30 @@ def normalize(factor):
     for assignment in AllPossibleAssignmentDicts:
         total_probability += factor.getProbability(assignment)
 
+    """ 
+    If the sum of probabilities in the input factor is 0,
+    you should return None. 
+    """
     if total_probability == 0:
         return None
 
-    """ new_factor condioned variables = input factor conditioned variables + 
-        input factor one entry unconditioned variables
+    """ 
+    new_factor condioned variables = input factor conditioned variables + 
+    input factor one entry unconditioned variables
     """
     # Get one entry unconditioned variables 
     one_entry_variables = []
     for variable in unconditionedVariables:
         if len(variableDomainsDict[variable]) == 1:
-            one_entry_variables.append(variable)   # Save them to exclude them from the new unconditioned variables set
-            new_conditionedVariables.add(variable) # Add no the new conditioned variables set
+            one_entry_variables.append(variable)   # Save them to exclude them later from the new unconditioned variables set
+            new_conditionedVariables.add(variable) # Add to the new conditioned variables set
 
     # All the remaining variables are unconditioned
     for variable in unconditionedVariables:
         if variable not in one_entry_variables:
             new_unconditionedVariables.add(variable)
 
-    new_factor = Factor(new_unconditionedVariables, new_conditionedVariables, variableDomainsDict)
+    new_factor = Factor(new_unconditionedVariables, new_conditionedVariables, variableDomainsDict) # variableDomainsDict doesn't change
 
     for assignment in AllPossibleAssignmentDicts:
         new_probability = factor.getProbability(assignment) / total_probability

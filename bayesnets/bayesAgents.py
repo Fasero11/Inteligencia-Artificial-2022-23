@@ -106,13 +106,14 @@ def constructBayesNet(gameState):
                 edges.append((FOOD_HOUSE_VAR, obsVar)) 
                 edges.append((GHOST_HOUSE_VAR, obsVar))
 
-    # Set remaining edges following figure. All tuples parent -> child
+    # Set remaining edges following figure. All tuples: parent -> child
     edges.append((X_POS_VAR, FOOD_HOUSE_VAR))
     edges.append((X_POS_VAR, GHOST_HOUSE_VAR))
     edges.append((Y_POS_VAR, FOOD_HOUSE_VAR))
     edges.append((Y_POS_VAR, GHOST_HOUSE_VAR))
 
     # set each variableDomainsDict[var] = values
+    # (Assign possible values to each node)
     variableDomainsDict[X_POS_VAR]  = X_POS_VALS
     variableDomainsDict[Y_POS_VAR]  = Y_POS_VALS
     variableDomainsDict[FOOD_HOUSE_VAR]  = HOUSE_VALS

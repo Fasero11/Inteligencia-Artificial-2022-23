@@ -140,8 +140,11 @@ def inferenceByVariableEliminationWithCallTracking(callTrackingList=None):
         
         # Iterate trough eliminationOrder and eliminate the variables one by one.
         for variable in eliminationOrder:
-            current_factors, joined_factor = joinFactorsByVariable(current_factors, variable)
-            # eliminate only if factor has more than one unconditioned variable.
+            factors_joined = joinFactorsByVariable(current_factors, variable)
+            current_factors = factors_joined[0]
+            joined_factor = factors_joined[1]
+            
+            # eliminate ONLY IF factor has more than one unconditioned variable.
             if len(joined_factor.unconditionedVariables()) > 1:
                 factor = eliminate(joined_factor, variable)
                 current_factors.append(factor)
